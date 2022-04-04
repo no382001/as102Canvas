@@ -1,5 +1,9 @@
-createAsciiCanvas("image",100,30,"body","x");
-createAsciiBuffer("img/test.txt","buff","body");
+createAsciiCanvas("image",200,75,"body"," ");
+createAsciiBuffer("img/1.txt","egy","body");
+drawWithScatter("egy","image",100,35,20)
 
-drawFromBuffer("buff","image",4,10)
+//drawFromBuffer("egy","image",100,50)
+
+/*drawFromBuffer("buff","image",50,50)
+*/
 //async fuckery

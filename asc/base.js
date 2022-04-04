@@ -2,6 +2,7 @@ sleep = function(ms){return new Promise(resolve => setTimeout(resolve,ms));}
 
 createAsciiCanvas = function(name,width,height,parent,bg){
 	//creates a w*h canvas with parent and selected bg
+	//fillcanvas essentially does the same maybe merge?
 	canvas = document.createElement('div');
 	canvas.id = name;
 	parent = document.querySelector(parent);
@@ -39,73 +40,154 @@ createAsciiBuffer = function(pathtotxt,buffername,parent){
     xhr.send();
 }
 
+//deleteAsciiBuffer = function()
+
 determineHeight = function(asc){
 	return document.getElementById(asc).innerHTML.split("</p>").length-1;}
 
 determineWidth = function(asc){
-	return document.getElementById(asc).innerHTML.split("</p>")[0].replace(/\<[^()]*\>/g, '').length;
+	return document.getElementById(asc).innerHTML.split("</p>")[1].replace(/\<[^()]*\>/g, '').length;
 }
 
-drawFromBuffer = function(buffer,canvas,xpos,ypos,CENTER=0){
-	//draws from buffer to a specified canvas
-	//to centered x,y positions
-	//or just to the center
-
-
-	//from buffer to image
-	im_W = determineWidth(canvas);
-	im_H = determineHeight(canvas);
-	
-	bu_w = determineWidth(buffer);
-	bu_h = determineHeight(buffer);
-
-	leftcorner_x_bu = xpos-Math.floor(bu_w/2); //0,0 of bu
-	rightcorner_x_bu = xpos+Math.floor(bu_w/2);
-
-	for (var i = 0; i < bu_h-1;i++){
-		try{
-			value = document.getElementById("buff").innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'');
-			replaceString(canvas,xpos,ypos+i,value);
-		}catch{
-			console.log("drawFromBuffer",i,value);
-			0}
-		}
-	/*async function runner(canvas,buffer, torch_matrix){
-	//recieves a matrix and a torch that he will carry thru the pre defined random positions and change the values according to the result array
-	
-	//canvas = matrix
-
-	sleep = function(ms){return new Promise(resolve => setTimeout(resolve,ms));}
+drawWithScatter = async function(buffer,canvas,xpos,ypos,speed){
 	await sleep(1000);
 
-	for (var i = 0; i < (ascWidth*(ascHeight)); i++) {
-		
-		let row = Math.floor(matrix[i] / ascWidth);
-		let col = matrix[i] - (row*ascWidth);
-		
-		
-		let torch = document.getElementById("row"+row+"buffer").innerText[col];
+	iw = determineWidth(canvas);
+	ih = determineHeight(canvas);
 
-		replaceString(row,col,torch);
+	whitespace = "2";
 
-		//stop to show only every 10th replacement, seems fluid enough
-		if (i%10 == 0){await sleep(1);}}
+	parent = "body";
+	createAsciiCanvas("scatter",iw,ih,parent,whitespace);
 
-	console.log("the runner has finished torching!");
-	console.log("iw:",ascWidth,"ih:",ascHeight,"totalpix:",ascWidth*ascHeight,"same/skipped:",(ascWidth*ascHeight)-replacecounter);
+	document.getElementById("scatter").style.display = "none";
+	drawFromBuffer(buffer,"scatter",xpos,ypos);
+
+	//cut away all whitespace resulting in the cropped image
+	var data = document.getElementById("scatter").innerHTML.split("</p>");
+	var h = data[0].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&").length;
+	var w = data.length;
+
+	const regx = new RegExp(whitespace,'g');
+
+	var n = [];
+	for (var i = 0; i < w; i++){
+		d = data[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&").replace(regx,"");
+		if (d!=""){
+			n.push(d);
+		}
+	}
+	data = document.getElementById("scatter");
+	data.remove(); //remove dom element
+
+
+	new_bh = n.length; //new cropped buffer size
+	new_bw = n[0].length;
+
+	//create a new buffer with the name scatter
+	buffer = document.createElement('div');
+	buffer.id = "scatter";
+	buffer.style.display = 'none';
+	parent = document.querySelector(parent);
+	parent.appendChild(buffer);
+	for (var i = 0; i < new_bh; i++){
+		p = document.createElement('p');
+		p.id = "row" + i + "" + buffer.id; //set id
+		p.innerText = n[i];
+		buffer.appendChild(p);
+		}
+
+	//create scatter matrix size of buffer and shuffle it for random effect
+	function shuffle(array) {
+	  var tmp, current, top = array.length;
+	  if(top) while(--top) {
+	    current = Math.floor(Math.random() * (top + 1));
+	    tmp = array[current];
+	    array[current] = array[top];
+	    array[top] = tmp;
+	  }
+	  return array;
+	}
+	
+	for (var matrix=[],i=1;i<new_bw*(new_bh+1);++i) matrix[i]=i;
+	matrix = shuffle(matrix);
+
+	//console.log(matrix);
+
+	for (var i = 0; i < (new_bw*(new_bh)); i++) {
+		
+		let row = Math.floor(matrix[i] / new_bw) ; //add +1 to shift it by 50% to the right ??????
+		let col = matrix[i] - (row*new_bw);
+
+		try{
+			let torch = document.getElementById("row"+row+""+"scatter").innerHTML.replace(/&amp;/g,"&")[col];
+			replaceString(canvas,col+xpos-(bw/2),row+ypos-(bh/2),torch);
+		}
+		
+		catch{
+			continue; // iterates thru the last row which is not ideal as there is nothing there FIX THIS
+			//console.log(row,col)
+		}
+
+		if (i%speed == 0){await sleep(1);} //stop to show only every 10th replacement, seems fluid enough
+	}
+	data = document.getElementById("scatter");
+	data.remove(); //remove dom element
 }
 
-*/
+drawFromBuffer = function(buffer,canvas,xpos,ypos,mode=0){
+	//revisit and make code clearer
 
-	//
+	bh = determineHeight(buffer);
+	bw = determineWidth(buffer);
 
+	iw = determineWidth(canvas);
+
+	bwleftedge = xpos - bw/2;
+	bhleftedge = ypos - bh/2
+	bwrightedge = xpos + bw/2;
+
+	for (var i = 1; i < determineHeight(canvas)-1;i++){
+			try{
+				value = document.getElementById(buffer).innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
+				
+				//console.log(value);
+				
+				if(bwleftedge < 0){ //bordercheck left
+					value = value.substring(bwleftedge*-1);
+					replaceString(canvas,0,ypos+i-(bh/2),value);
+				}else if(bwrightedge > iw){ //bordercheck right
+					value = value.substring(0,bw-(bwrightedge-iw));
+					replaceString(canvas,xpos-(bw/2),ypos-(bh/2)+i,value);
+				}else{
+					replaceString(canvas,xpos-(bw/2),ypos-(bh/2)+i,value);
+					}
+			}catch{
+				if (bhleftedge < 0){
+					//console.log("drawFromBuffer: top out of bounds");
+					continue;
+				}else{
+					//console.log("drawFromBuffer: bottom out of bounds");
+					break;
+				}
+			}
+		}
+	}
+
+fillCanvas = function(canvas,bg = " "){
+	width = determineWidth(canvas);
+	height = determineHeight(canvas);
+	for(var i = 0; i < height;i++){
+		paragraph = document.getElementById("row"+i+""+canvas);
+		paragraph.innerText = new Array(width + 1).join(bg);
+	}
 }
 
 String.prototype.replaceAt = function(index, replacement){return this.substring(0, index) + replacement + this.substring(index + replacement.length);}
 
 replaceString = function(canvas,col,row,value){
 	let row_data = document.getElementById("row"+row+""+canvas);
-	let text = row_data.innerText //.replace(/&amp;/g,"&"); //innerHTML changes every & to &amp; every single time
+	let text = row_data.innerText.replace(/&amp;/g,"&"); //innerHTML changes every & to &amp; every single time
 	if (text[col] != value){ //dont replace if its the same
 		try{
 			row_data.innerText = text.replaceAt(col,value);
