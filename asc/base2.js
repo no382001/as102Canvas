@@ -1,6 +1,6 @@
 sleep = function(ms){return new Promise(resolve => setTimeout(resolve,ms));}
 
-/*createAsciiCanvas = function(name,width,height,parent,bg){
+createAsciiCanvas = function(name,width,height,parent,bg){
 	//creates a w*h canvas with parent and selected bg
 	//fillcanvas essentially does the same maybe merge?
 	canvas = document.createElement('div');
@@ -14,9 +14,8 @@ sleep = function(ms){return new Promise(resolve => setTimeout(resolve,ms));}
 		canvas.appendChild(p);
 	}
 }
-*/
 
-/*createAsciiBuffer = function(pathtotxt,buffername,parent){
+createAsciiBuffer = function(pathtotxt,buffername,parent){
 	//creates a buffer for the content to be displayed
 	//buffer is needed for the image to be shown on screen
 	buffer = document.createElement('div');
@@ -40,19 +39,19 @@ sleep = function(ms){return new Promise(resolve => setTimeout(resolve,ms));}
     }
     xhr.open('GET', pathtotxt);
     xhr.send();
-}*/
+}
 
-/*deleteAscii = function(asc){
+deleteAscii = function(asc){
 	data = document.getElementById(asc);
 	data.remove(); //remove dom element
 }
-*/
-/*determineHeight = function(asc){
+
+determineHeight = function(asc){
 	return document.getElementById(asc).innerHTML.split("</p>").length-1;}
 
 determineWidth = function(asc){
 	return document.getElementById(asc).innerHTML.split("</p>")[1].replace(/\<[^()]*\>/g, '').length;
-}*/
+}
 
 drawWithScatter = async function(buffer,canvas,xpos,ypos,speed){
 	await sleep(1000);
@@ -82,6 +81,8 @@ drawWithScatter = async function(buffer,canvas,xpos,ypos,speed){
 			n.push(d);
 		}
 	}
+	
+
 	deleteAscii("scatter");
 
 	new_bh = n.length; //new cropped buffer size
@@ -142,7 +143,7 @@ drawWithScatter = async function(buffer,canvas,xpos,ypos,speed){
 	//deleteAscii("scatter");
 }
 
-/*drawFromBuffer = function(buffer,canvas,xpos,ypos,mode=0){
+drawFromBuffer = function(buffer,canvas,xpos,ypos,mode=0){
 	//revisit and make code clearer
 
 	bh = determineHeight(buffer);
@@ -154,33 +155,45 @@ drawWithScatter = async function(buffer,canvas,xpos,ypos,speed){
 	bwrightedge = xpos + bw/2;
 	bhleftedge = ypos - bh/2
 
-	for (var i = 1; i < determineHeight(canvas)-1;i++){		
+	for (var i = 1; i < determineHeight(canvas)-1;i++){
+			
 			try{
 				value = document.getElementById(buffer).innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
 
 				if(bwleftedge < 0 && bwrightedge > iw){ //OoB check
+				
 					value = value.substring(bwleftedge*-1,bw-(bwrightedge-iw));
 					replaceString(canvas,0,ypos-(bh/2)+i,value);
+				
 				}else{
+
 					if(bwleftedge < 0){ //bordercheck left
+				
 						value = value.substring(bwleftedge*-1);
 						replaceString(canvas,0,ypos+i-(bh/2),value);
+					
 					}else if(bwrightedge > iw){ //bordercheck right
+				
 						value = value.substring(0,bw-(bwrightedge-iw));
 						replaceString(canvas,xpos-(bw/2),ypos-(bh/2)+i,value);
+					
 					}else{
+				
 						replaceString(canvas,xpos-(bw/2),ypos-(bh/2)+i,value);
 					}
 				}
 			}catch{
 				if (bhleftedge < 0){ //y OoB top
+			
 					continue;
+			
 				}else{ //y OoB bottom
+			
 					break;
 				}
 			}
 		}
-	}*/
+	}
 
 fillCanvas = function(canvas,bg = " "){
 	width = determineWidth(canvas);

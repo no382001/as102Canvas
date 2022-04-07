@@ -12,17 +12,11 @@
 	}
 	#image {
 		text-align: center;
-		/*margin: 0;
-		padding-top: 0;
-		margin-bottom: 0;*/
 		line-height : 0px;
 
 	}
 	#scatter{
 		text-align: center;
-		/*margin: 0;
-		padding-top: 0;
-		margin-bottom: 0;*/
 		line-height : 0px;
 	}
 	.unselectable {
@@ -40,5 +34,6 @@
 <body>
 </body>
 <script src="asc/base.js"></script>
+<script src="asc/classes.js"></script>
 <script src="asc/asc.js"></script>
 </html>
