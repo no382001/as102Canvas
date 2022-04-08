@@ -1,7 +1,9 @@
-c = new ascCanvas("image",200,200,"body","x");
+c = new ascCanvas("image",200,100,"body","x");
 b = new ascBuffer("img/1.txt","egy","body");
 
-c.drawFromBuffer(b,100,50);
+c.drawFromBuffer(b,100,100);
+
+c.drawWithScatter(b,100,50);
 
 /*createAsciiCanvas("image",100,50,"body","x");
 createAsciiBuffer("img/1.txt","egy","body");
