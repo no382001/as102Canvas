@@ -82,6 +82,12 @@ class ascCanvas {
 		this.cstack = new coordstack;
 
 	}
+	getwidth(){
+		return this.width;
+	}
+	getheight(){
+		return this.height;
+	}
 
 	delete(){
 		document.getElementById(this.name).remove();
@@ -219,8 +225,8 @@ class ascCanvas {
 
 		// create an empty canvas with pre deifined whitespace all over it, and draw the buffer on
 		let temp = new ascCanvas("scatter",this.width,this.height,this.parent.localName,whitespace);
-		//temp.style.display = "none";
 
+		document.getElementById("scatter").style.display = "none";
 
 		temp.drawFromBuffer(buffer,xpos,ypos);
 
@@ -255,6 +261,9 @@ class ascCanvas {
 
 
 		temp = new ascBuffer(n,"scatter","body",	1,new_bh); //load from n*{row} variable
+		document.getElementById("scatter").style.display = "none";
+
+
 
 		let scatter2w = temp.getwidth();
 		let scatter2h = temp.getheight();
@@ -314,7 +323,6 @@ class ascCanvas {
 
 
 }
-
 
 class ascBuffer {
 	
