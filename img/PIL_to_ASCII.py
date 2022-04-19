@@ -4,6 +4,8 @@ import sys
 #ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
 ASCII_CHARS = """$@B%8KWM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`'. """
 
+#ASCII_CHARS = ASCII_CHARS[::-1]
+
 def resize_image(image, new_width):
     width, height = image.size
     ratio = height/width/2 #maintain aspect ratio 1.65
