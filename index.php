@@ -33,7 +33,6 @@
 </style>
 <body>
 </body>
-<script src="asc/base.js"></script>
-<script src="asc/classes.js"></script>
 <script src="asc/asc.js"></script>
+<script src="script.js"></script>
 </html>

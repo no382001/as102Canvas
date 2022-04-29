@@ -49,7 +49,7 @@ class coordstack{
 	top(){
 		return this.stack[this.stack.length-1];
 	}
-	push(a,b){
+	translate(a,b){
 		if(this.top()){
 			let t = this.top();
 			this.stack.push([a+t[0],b+t[1]]);
@@ -255,13 +255,12 @@ class ascCanvas {
 
 		temp.drawFromBuffer(buffer,xpos,ypos);
 
-		//console.log(temp.canvas.innerHTML);
-
 		//cut away the all whitespace
 		let data = temp.canvas.innerHTML.split("</p>");
 		let h = data[1].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&").length;
 		let w = data.length-1;
 
+		//calculate the "speed" of the animation
 		speed = speed * (h/w) *10;
 
 		const regx = new RegExp(whitespace,'g');
@@ -285,17 +284,16 @@ class ascCanvas {
 		new_bw % 2 != 0 ? new_bw += 1 : new_bw = new_bw;
 
 
-		temp = new ascBuffer(n,"scatter","body",	1,new_bh); //load from n*{row} variable
+		//load from n*{row} variable
+		temp = new ascBuffer(n,"scatter","body",	1,new_bh); 
 		document.getElementById("scatter").style.display = "none";
-
-
 
 		let scatter2w = temp.getwidth();
 		let scatter2h = temp.getheight();
 
 		let matrix = [];
 		for (i=0;i<new_bw*(new_bh-1);++i) matrix[i]=i; //-1 for the last row, undefined
-		//console.log(matrix);
+
 		matrix = shuffle(matrix);
 
 		w = temp.getwidth()
@@ -308,7 +306,7 @@ class ascCanvas {
 
 		let leftedge = OoB;
 
-		OoB = OoB[0];  										//FIX THIS!! LOOKS DISGUSTING
+		OoB = OoB[0];  				//FIX THIS!! LOOKS DISGUSTING
 
 		if (OoB.has("right")){
 			xoffset =  this.width - scatter2w;
@@ -330,23 +328,19 @@ class ascCanvas {
 
 		for (var i = 0; i < (new_bw*(new_bh-1)); i++) {
 
-			let row = Math.floor(matrix[i] / new_bw) ; //add +1 to shift it by 50% to the right ??????
+			let row = Math.floor(matrix[i] / new_bw); //add +1 to shift it by 50% to the right ??????
 			let col = matrix[i] - (row*new_bw);
 
 					let torch = document.getElementById("row"+row+""+"scatter").innerHTML.replace(/&amp;/g,"&")[col];
 					
 					if(torch == undefined ){break;}
 
-					replaceString(this.name,col+xoffset,(row)+yoffset,torch); //h-row inverts??
-
-			
-			if (i%(speed)== 0){await sleep(2);}//stop to show only every 10th replacement, seems fluid enough
+					replaceString(this.name,col+xoffset,(row)+yoffset,torch); //h-row inverts (perhaps a feature?)
+	
+			if (i%(speed)== 0){await sleep(2);}
 		}
-
 		temp.delete();
 	}
-
-
 }
 
 class ascBuffer {
@@ -357,7 +351,7 @@ class ascBuffer {
 		var buffer = document.createElement('div');
 		buffer.id = name;
 
-		//this.buffer.className = "unselectable";
+		this.buffer.className = "unselectable";
 		
 		buffer.style.display = 'none';
 		this.parent = document.querySelector(parent);
@@ -404,8 +398,6 @@ class ascBuffer {
 
 	    this.width = this.obj.innerHTML.split("</p>")[1].replace(/\<[^()]*\>/g, '').length;
 	    this.width % 2 != 0 ? this.width -= 1 : this.width = this.width;
-	    //console.log(this.height,this.width)
-
 	}
 
 	delete(){
