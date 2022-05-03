@@ -73,15 +73,15 @@ wherever you want to place the canvas, make sure that the section uses the **mon
 
 	font-family: "Lucida Console", "Courier New", monospace;
 
-i also recommend: 
+i also recommend using: 
 			
 	white-space: pre;
 
-although i forgot what it did exactly and removing it makes no noticable difference. <br>
-but perhaps the most important is setting the **line-height** to **zero** if you want your ASCII canvas to look like a real canvas.
+although i forgot what it did exactly and removing it makes no noticable difference. but to make this work and look exactly like in the presentation above  you should also have this in your css <br>
+the heart and soul of the whole gig is setting the **line-height** to **zero** if you want your ASCII canvas to look like a real canvas, instead a stack of paragraphs (which it really is).
 
 	line-height : 0px;
-one last addition is a code to make the text **unselectable** to users, i think this improves the whole concept a lot, because with this little snippet of CSS, yeah, the text will be unselectable
+a last addition is a code to make the text **unselectable** to users, i think this improves the whole concept a lot, because with this little snippet of CSS, yeah, the text will be unselectable
 
 	.unselectable {
 	    -webkit-touch-callout: none;
