@@ -34,5 +34,5 @@
 <body>
 </body>
 <script src="asc/asc.js"></script>
-<script src="script.js"></script>
+<script src="concept.js"></script>
 </html>

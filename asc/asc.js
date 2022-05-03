@@ -23,6 +23,11 @@ SOFTWARE.
 
 */
 
+// await sleep(2) in animation, bunches up a lot of dom calls and executes them at once (probably works this way), on other animations this would be highly inefficient
+//implement scroll animation (migh be taxing on memory and DOM calls)
+//implement scrolling from an angle
+//implement paging
+
 sleep = function(ms){
 	return new Promise(resolve => setTimeout(resolve,ms));
 }
@@ -93,6 +98,7 @@ class ascCanvas {
 	
 		this.canvas = document.createElement('div');
 		this.canvas.id = name;
+		this.canvas.className = "unselectable";
 		
 		this.parent = document.querySelector(parent);
 		this.parent.appendChild(this.canvas);
@@ -105,11 +111,14 @@ class ascCanvas {
 		}
 
 		this.cstack = new coordstack;
+		this.page;
 
 	}
+
 	getwidth(){
 		return this.width;
 	}
+	
 	getheight(){
 		return this.height;
 	}
@@ -168,23 +177,16 @@ class ascCanvas {
 			ypos += t[1];
 		}	
 
-
 		let bw = buffer.getwidth();
 		let bh = buffer.getheight();
-
 		//console.log("buf:",bw,bh);
 		//console.log("canv",this.height,this.width)
-
 		let bwleftedge = xpos - bw/2;
 		let bwrightedge = xpos + bw/2;
-
 		let bhleftedge = ypos - bh/2;
 		let bhleftbottom = ypos + bh/2;
-
 		//console.log("left:",bwleftedge,bwrightedge)
-
 		for (let i = 1; i < bh-1; i++){
-
 			if (bhleftedge+i < 0){ //y OoB top
 				//console.log(i,"top",bhleftedge+i)
 				continue;
@@ -192,30 +194,25 @@ class ascCanvas {
 				//console.log("bottom",bhleftbottom)
 				break;
 			}
-
 			let value = buffer.obj.innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
 			//console.log(i)
-
-
+			
 			if(bwleftedge < 0 && bwrightedge > this.width){ //OoB check
 				value = value.substring(bwleftedge*-1,bw-(bwrightedge-this.width));
 				//console.log(i,"oob",0,ypos-(bh/2)+i,value);
 				replaceString(this.name,0,ypos-(bh/2)+i,value);
 				continue;
-			
 			}else if(bwleftedge < 0){
 				//bordercheck left
 				value = value.substring(bwleftedge*-1);
 				//console.log(i,"left",0,ypos+i-(bh/2),value);
 				replaceString(this.name,0,ypos+i-(bh/2),value);
 				continue;
-
 			}else if(bwrightedge > this.width){ //bordercheck right
 				value = value.substring(0,bw-(bwrightedge-this.width));
 				//console.log(i,"right",xpos-(bw/2),ypos-(bh/2)+i,value);
 				replaceString(this.name,xpos-(bw/2),ypos-(bh/2)+i,value);
 				continue;
-		
 			}else{
 				replaceString(this.name,xpos-(bw/2),ypos-(bh/2)+i,value);
 				continue;
@@ -337,9 +334,57 @@ class ascCanvas {
 
 					replaceString(this.name,col+xoffset,(row)+yoffset,torch); //h-row inverts (perhaps a feature?)
 	
-			if (i%(speed)== 0){await sleep(2);}
+			if (i%(speed) == 0){await sleep(2);}
 		}
 		temp.delete();
+	}
+
+	drawWithScroll = async function(buffer,xpos,ypos,speed=2){
+		
+		//a shameless copy of drawFromBuffer with the only addition being the async function sleep, as i dont want to make drawFromBuffer async at all
+
+		//sleep and draw speed needs to be adjusted
+
+		if(this.cstack.top()){
+			let t = this.cstack.top();
+			xpos += t[0];
+			ypos += t[1];
+		}	
+
+		let bw = buffer.getwidth();
+		let bh = buffer.getheight();
+		let bwleftedge = xpos - bw/2;
+		let bwrightedge = xpos + bw/2;
+		let bhleftedge = ypos - bh/2;
+		let bhleftbottom = ypos + bh/2;
+		for (let i = 1; i < bh-1; i++){
+			if (bhleftedge+i < 0){ //y OoB top
+				continue;
+			}else if (bhleftbottom*-1+i > this.height){ //y OoB bottom
+				break;
+			}
+			let value = buffer.obj.innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
+			
+			//drawWithScroll
+			if (i % (speed) == 0){await sleep(24);}
+			
+			if(bwleftedge < 0 && bwrightedge > this.width){ //OoB check
+				value = value.substring(bwleftedge*-1,bw-(bwrightedge-this.width));
+				replaceString(this.name,0,ypos-(bh/2)+i,value);
+				continue;
+			}else if(bwleftedge < 0){
+				value = value.substring(bwleftedge*-1);
+				replaceString(this.name,0,ypos+i-(bh/2),value);
+				continue;
+			}else if(bwrightedge > this.width){ //bordercheck right
+				value = value.substring(0,bw-(bwrightedge-this.width));
+				replaceString(this.name,xpos-(bw/2),ypos-(bh/2)+i,value);
+				continue;
+			}else{
+				replaceString(this.name,xpos-(bw/2),ypos-(bh/2)+i,value);
+				continue;
+			}
+		}
 	}
 }
 
@@ -351,7 +396,7 @@ class ascBuffer {
 		var buffer = document.createElement('div');
 		buffer.id = name;
 
-		this.buffer.className = "unselectable";
+		buffer.className = "unselectable";
 		
 		buffer.style.display = 'none';
 		this.parent = document.querySelector(parent);
@@ -412,5 +457,3 @@ class ascBuffer {
 	}
 
 }
-
-
