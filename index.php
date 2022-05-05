@@ -8,8 +8,13 @@
 <style>
 	body {
 		font-family: "Lucida Console", "Courier New", monospace;
+		font-size: 50%;
 		white-space: pre;
-	}
+
+		background-repeat: no-repeat;
+  		background-attachment: fixed;
+  		background-position: center; 
+ 	}
 	#image {
 		text-align: center;
 		line-height : 0px;

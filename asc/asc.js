@@ -23,10 +23,12 @@ SOFTWARE.
 
 */
 
-// await sleep(2) in animation, bunches up a lot of dom calls and executes them at once (probably works this way), on other animations this would be highly inefficient
-//implement scroll animation (migh be taxing on memory and DOM calls)
+//a buffer can be used as a sort of page
+//add function to write content of canvas in a buffer
+
 //implement scrolling from an angle
-//implement paging
+
+//implement dynamic letter sizes so you dont have to zoom out
 
 sleep = function(ms){
 	return new Promise(resolve => setTimeout(resolve,ms));
@@ -232,6 +234,13 @@ class ascCanvas {
 		}
 	}
 
+	clear(value=this.bg){
+		for (var i = 0; i < this.height; i++){
+			let p = document.getElementById("row" + i + "" + this.canvas.id);
+			p.innerText = new Array(this.width + 1).join(value);
+		}
+	}
+
 	addTextLine(xpos,ypos,value){
 		if(this.cstack.top()){
 			let t = this.cstack.top();
@@ -386,12 +395,20 @@ class ascCanvas {
 			}
 		}
 	}
+
+	copyToBuffer(buffer){
+		//first row will get corrupted probably some index mixed up or bad buffer implementation
+		//that is some problem with the file loaded into the buffer
+
+		document.getElementById(buffer.name).innerHTML = document.getElementById(this.name).innerHTML;
+	}
+
 }
 
 class ascBuffer {
 	
 	constructor (pathtotxt,name,parent,		loadmode=0,bh=0){
-	
+
 		this.name = name;
 		var buffer = document.createElement('div');
 		buffer.id = name;
