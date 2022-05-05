@@ -234,7 +234,12 @@ class ascCanvas {
 		}
 	}
 
-	clear(value=this.bg){
+	clear(value = this.bg){
+
+		if(value != this.bg){
+			this.bg = value;
+		}
+
 		for (var i = 0; i < this.height; i++){
 			let p = document.getElementById("row" + i + "" + this.canvas.id);
 			p.innerText = new Array(this.width + 1).join(value);
