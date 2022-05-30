@@ -23,13 +23,6 @@ SOFTWARE.
 
 */
 
-//a buffer can be used as a sort of page
-//add function to write content of canvas in a buffer
-
-//implement scrolling from an angle
-
-//implement dynamic letter sizes so you dont have to zoom out
-
 sleep = function(ms){
 	return new Promise(resolve => setTimeout(resolve,ms));
 }
@@ -188,6 +181,7 @@ class ascCanvas {
 		let bhleftedge = ypos - bh/2;
 		let bhleftbottom = ypos + bh/2;
 		//console.log("left:",bwleftedge,bwrightedge)
+		
 		for (let i = 1; i < bh-1; i++){
 			if (bhleftedge+i < 0){ //y OoB top
 				//console.log(i,"top",bhleftedge+i)
@@ -196,7 +190,8 @@ class ascCanvas {
 				//console.log("bottom",bhleftbottom)
 				break;
 			}
-			let value = buffer.obj.innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
+			
+			let value = document.getElementById("row"+i+buffer.name).innerText;
 			//console.log(i)
 			
 			if(bwleftedge < 0 && bwrightedge > this.width){ //OoB check
@@ -268,27 +263,30 @@ class ascCanvas {
 
 		//cut away the all whitespace
 		let data = temp.canvas.innerHTML.split("</p>");
-		let h = data[1].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&").length;
+		//let h = data[1].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&").length;
+		let h = document.getElementById("row1scatter").innerText.length
 		let w = data.length-1;
 
 		//calculate the "speed" of the animation
 		speed = speed * (h/w) *10;
 
+		//we need to apply regex when the image is no OOB
+		//but we can apply it every time, it wont interfere with anything
 		const regx = new RegExp(whitespace,'g');
 
+		//FIXME this could be replaced with a list comprenehsion
 		let n = [];
 		for (var i = 0; i < w; i++){
-			//console.log(data[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&"));
-			let d = data[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&").replace(regx,"");
-			if (d!=""){
-				n.push(d);
-			}
+			let d = document.getElementById("row"+i+"scatter").innerText.replace(regx,"");
+			n.push(d);
 		}
 
 		let OoB = temp.checkOoB(buffer,xpos,ypos);
 
 		temp.delete();
 
+
+		//FIXME this is working but i have the suspicion that this is why sometimes certan numbers dont work
 		let new_bh = n.length; //new cropped buffer size
 		new_bh % 2 != 0 ? new_bh += 1 : new_bh = new_bh;
 		let new_bw = n[1].length;
@@ -297,13 +295,14 @@ class ascCanvas {
 
 		//load from n*{row} variable
 		temp = new ascBuffer(n,"scatter","body",	1,new_bh); 
+
 		document.getElementById("scatter").style.display = "none";
 
 		let scatter2w = temp.getwidth();
 		let scatter2h = temp.getheight();
 
 		let matrix = [];
-		for (i=0;i<new_bw*(new_bh-1);++i) matrix[i]=i; //-1 for the last row, undefined
+		for (i=0;i<new_bw*(new_bh);++i) matrix[i]=i;
 
 		matrix = shuffle(matrix);
 
@@ -317,12 +316,12 @@ class ascCanvas {
 
 		let leftedge = OoB;
 
-		OoB = OoB[0];  				//FIX THIS!! LOOKS DISGUSTING
-
+		//FIXME!! LOOKS DISGUSTING
+		// and probably does not cover all cases
+		OoB = OoB[0];
 		if (OoB.has("right")){
 			xoffset =  this.width - scatter2w;
 		}
-
 		if (OoB.has("bottom")){
 			yoffset = this.height - scatter2h; 
 		}
@@ -337,26 +336,29 @@ class ascCanvas {
 
 		console.log(xoffset,yoffset)
 
-		for (var i = 0; i < (new_bw*(new_bh-1)); i++) {
+		for (var i = 0; i < (new_bw*(new_bh)); i++) {
 
-			let row = Math.floor(matrix[i] / new_bw); //add +1 to shift it by 50% to the right ??????
+			let row = Math.floor(matrix[i] / new_bw); //add +1 to shift it by 50% to the right
 			let col = matrix[i] - (row*new_bw);
 
-					let torch = document.getElementById("row"+row+""+"scatter").innerHTML.replace(/&amp;/g,"&")[col];
+					let torch = document.getElementById("row"+row+""+"scatter").innerText[col];
 					
 					if(torch == undefined ){break;}
 
-					replaceString(this.name,col+xoffset,(row)+yoffset,torch); //h-row inverts (perhaps a feature?)
+					replaceString(this.name,col+xoffset,(row)+yoffset,torch); //h-row inverts
 	
 			if (i%(speed) == 0){await sleep(2);}
 		}
 		temp.delete();
 	}
 
-	drawWithScroll = async function(buffer,xpos,ypos,speed=2){
-		
-		//a shameless copy of drawFromBuffer with the only addition being the async function sleep, as i dont want to make drawFromBuffer async at all
 
+	drawWithDown = async function(buffer,xpos,ypos,speed=2){
+		
+		//FIXME This has to reconciled somehow with drawFromBuffer
+		//a shameless copy of drawFromBuffer with the only
+		//addition being the async function sleep, as i dont want to make drawFromBuffer async at all
+		
 		//sleep and draw speed needs to be adjusted
 
 		if(this.cstack.top()){
@@ -405,14 +407,18 @@ class ascCanvas {
 		//first row will get corrupted probably some index mixed up or bad buffer implementation
 		//that is some problem with the file loaded into the buffer
 
+		//FIXTHIS EASY
+		//also if i mirror the innerHTML, the canvas basically loses its rows, as the buffer rows have different ids
+		//this has to be the problem
+
 		document.getElementById(buffer.name).innerHTML = document.getElementById(this.name).innerHTML;
 	}
 
 }
 
 class ascBuffer {
-	
-	constructor (pathtotxt,name,parent,		loadmode=0,bh=0){
+	constructor (pathtotxt,name,parent,
+				loadmode=0,bh=0){ //FIXME there has to be a better way to this
 
 		this.name = name;
 		var buffer = document.createElement('div');
@@ -439,7 +445,7 @@ class ascBuffer {
 				}
 		    }
 
-		    //using syncronous HTTP request, that is deprecated !!!
+		    //using syncronous HTTP request, that is deprecated but gets the job done right now
 		    xhr.open('GET', pathtotxt,false);
 		    xhr.send(null);
 		    this.obj = buffer;
@@ -463,7 +469,8 @@ class ascBuffer {
 	    this.height = Math.floor(this.obj.innerHTML.split("</p>").length);
 	    this.height % 2 != 0 ? this.height -= 1 : this.height = this.height;
 
-	    this.width = this.obj.innerHTML.split("</p>")[1].replace(/\<[^()]*\>/g, '').length;
+	    //FIXME this is also not efficient
+	    this.width = this.obj.innerHTML.split("</p>")[1].replace(/\<[^()]*\>/g,'').length;
 	    this.width % 2 != 0 ? this.width -= 1 : this.width = this.width;
 	}
 

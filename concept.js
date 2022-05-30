@@ -1,17 +1,32 @@
-c = new ascCanvas("image",200,80,"body"," ");
 
-b = new ascBuffer("img/1.txt","egy","body");
-
+main = async () =>	{
 
 
-c.drawFromBuffer(b,100,40);
+	c = new ascCanvas("image",100,50,"body","x");
 
-c.fillRect(50,30,100,100,"c");
+	//temp = new ascBuffer("img/1.txt","tempbuffer","body");
+	//c.copyToBuffer(temp);
 
-c.copyToBuffer(b);
+	b = new ascBuffer("img/1.txt","firstbuffer","body");
 
-c.clear()
+	await sleep(1000);
 
-c.drawFromBuffer(b,100,40);
-//c.drawWithScroll(b,100,30,2);
+	await c.drawFromBuffer(b,100,30,2);
 
+	await c.drawWithScatter(b,90,30,2);
+
+	await c.drawWithDown(b,80,20,2);
+
+}
+
+main()
+
+/*c.copyToBuffer(temp);
+
+fixing asc.js:406 probably solves this, see notes
+
+   Uncaught (in promise) TypeError: buffer.obj.innerHTML.split(...)[i] is undefined
+    drawWithScatter http://0.0.0.0:8000/asc/asc.js:377
+    main http://0.0.0.0:8000/concept.js:21
+    async* http://0.0.0.0:8000/concept.js:25
+*/
