@@ -2,8 +2,8 @@
 
 
 
-# as102Canvas
-
+# as102Canvas (under reconstruction)
+some procedures have changed name and functionality, so some parts of this document does not apply
 
 ### a demo (using the first animated function):
 
@@ -44,7 +44,7 @@ I will now present to you the main functions of the library (*the reason i made 
 
 ![3](https://user-images.githubusercontent.com/102482527/167014224-f78a8d29-d6ef-4d64-bd38-6310158d479a.png)
 
-...
+more to be added...
 
 
 
