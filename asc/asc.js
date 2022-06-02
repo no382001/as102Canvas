@@ -164,7 +164,7 @@ class ascCanvas {
 		return [ret,bwleftedge,bhleftedge];
 	}
 
-	drawFromBuffer(buffer,xpos,ypos){
+	drawFromBuffer = async function(buffer,xpos,ypos){
 		
 		if(this.cstack.top()){
 			let t = this.cstack.top();
@@ -194,6 +194,10 @@ class ascCanvas {
 			let value = document.getElementById("row"+i+buffer.name).innerText;
 			//console.log(i)
 			
+
+
+			//FIXME i have a function for OOB why is it not in use?
+
 			if(bwleftedge < 0 && bwrightedge > this.width){ //OoB check
 				value = value.substring(bwleftedge*-1,bw-(bwrightedge-this.width));
 				//console.log(i,"oob",0,ypos-(bh/2)+i,value);
@@ -286,7 +290,7 @@ class ascCanvas {
 		temp.delete();
 
 
-		//FIXME this is working but i have the suspicion that this is why sometimes certan numbers dont work
+		//FIXME this is working but i have the suspicion that this is why sometimes certain odd numbers dont work
 		let new_bh = n.length; //new cropped buffer size
 		new_bh % 2 != 0 ? new_bh += 1 : new_bh = new_bh;
 		let new_bw = n[1].length;
@@ -341,7 +345,9 @@ class ascCanvas {
 			let row = Math.floor(matrix[i] / new_bw); //add +1 to shift it by 50% to the right
 			let col = matrix[i] - (row*new_bw);
 
+					//let torch = document.getElementById("row"+row+""+"scatter").innerText[col];
 					let torch = document.getElementById("row"+row+""+"scatter").innerText[col];
+
 					
 					if(torch == undefined ){break;}
 
@@ -379,8 +385,9 @@ class ascCanvas {
 			}else if (bhleftbottom*-1+i > this.height){ //y OoB bottom
 				break;
 			}
-			let value = buffer.obj.innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
 			
+			let value = buffer.obj.innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
+
 			//drawWithScroll
 			if (i % (speed) == 0){await sleep(24);}
 			
@@ -404,14 +411,13 @@ class ascCanvas {
 	}
 
 	copyToBuffer(buffer){
-		//first row will get corrupted probably some index mixed up or bad buffer implementation
-		//that is some problem with the file loaded into the buffer
+		//FIXME there is still some coordinate shifting for whatever reason, it feels like its not drawing from the center
+		// whenever its drawing from the copied buffer
+		for(let i = 0; i< this.height;i++){
+			document.getElementById("row"+i+buffer.name).innerText = document.getElementById("row"+i+this.name).innerText;
+		}
+		
 
-		//FIXTHIS EASY
-		//also if i mirror the innerHTML, the canvas basically loses its rows, as the buffer rows have different ids
-		//this has to be the problem
-
-		document.getElementById(buffer.name).innerHTML = document.getElementById(this.name).innerHTML;
 	}
 
 }
