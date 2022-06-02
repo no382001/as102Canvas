@@ -359,55 +359,21 @@ class ascCanvas {
 	}
 
 
-	drawWithDown = async function(buffer,xpos,ypos,speed=2){
+	drawWithDown = async function(buffer,xpos,ypos,speed=10){
+
+		let temp = new ascCanvas("downbuffer",this.width,this.height,this.parent.localName,"2");
 		
-		//FIXME This has to reconciled somehow with drawFromBuffer
-		//a shameless copy of drawFromBuffer with the only
-		//addition being the async function sleep, as i dont want to make drawFromBuffer async at all
-		
-		//sleep and draw speed needs to be adjusted
+		document.getElementById("downbuffer").style.display = "none";
 
-		if(this.cstack.top()){
-			let t = this.cstack.top();
-			xpos += t[0];
-			ypos += t[1];
-		}	
+		temp.drawFromBuffer(buffer,xpos,ypos);
 
-		let bw = buffer.getwidth();
-		let bh = buffer.getheight();
-		let bwleftedge = xpos - bw/2;
-		let bwrightedge = xpos + bw/2;
-		let bhleftedge = ypos - bh/2;
-		let bhleftbottom = ypos + bh/2;
-		for (let i = 1; i < bh-1; i++){
-			if (bhleftedge+i < 0){ //y OoB top
-				continue;
-			}else if (bhleftbottom*-1+i > this.height){ //y OoB bottom
-				break;
-			}
-			
-			let value = buffer.obj.innerHTML.split("</p>")[i].replace(/\<[^()]*\>/g,'').replace(/&amp;/g,"&");
-
-			//drawWithScroll
-			if (i % (speed) == 0){await sleep(24);}
-			
-			if(bwleftedge < 0 && bwrightedge > this.width){ //OoB check
-				value = value.substring(bwleftedge*-1,bw-(bwrightedge-this.width));
-				replaceString(this.name,0,ypos-(bh/2)+i,value);
-				continue;
-			}else if(bwleftedge < 0){
-				value = value.substring(bwleftedge*-1);
-				replaceString(this.name,0,ypos+i-(bh/2),value);
-				continue;
-			}else if(bwrightedge > this.width){ //bordercheck right
-				value = value.substring(0,bw-(bwrightedge-this.width));
-				replaceString(this.name,xpos-(bw/2),ypos-(bh/2)+i,value);
-				continue;
-			}else{
-				replaceString(this.name,xpos-(bw/2),ypos-(bh/2)+i,value);
-				continue;
-			}
+		for(let i = 0; i< this.height;i++){
+			document.getElementById("row"+i+this.name).innerText = document.getElementById("row"+i+"downbuffer").innerText;
+			await sleep(speed*10); 
 		}
+
+		temp.delete();
+
 	}
 
 	copyToBuffer(buffer){
